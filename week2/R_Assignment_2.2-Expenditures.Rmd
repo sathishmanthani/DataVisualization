@@ -1,0 +1,74 @@
+---
+title: "Assignment 2.2"
+author: "Sathish Manthani"
+date: "6/27/2020"
+output: 
+  word_document: 
+fontsize: 13pt
+---
+
+### Packages
+Import the required packages/libraries to anlayze the dataset  
+
+```{r libraries, message = FALSE}
+
+library(ggplot2)    # plots for visualization
+library(dplyr)      # for data manipulation
+library(corrplot)   # for display of correlation matrix
+library(GGally)     # for gallary display of charts
+library(gridExtra)  # to view plots in grid
+library(purrr)      # for map_dbl function
+
+```
+
+
+### Read the data file  
+
+```{r data_import}
+df  <- read.csv("expenditures.txt", sep='\t', stringsAsFactors = FALSE)
+```
+
+```{r agg_data_for_treemap}
+library(sqldf)
+cat.df <- sqldf("select 
+          category
+          ,sum(expenditure) as expenditure 
+       from df 
+       group by category")
+
+```
+
+
+```{r treemap}
+library(treemapify)
+
+ggplot2::ggplot(cat.df, ggplot2::aes(area=expenditure, fill=category, label = category)) + geom_treemap() +
+  geom_treemap_text(fontface='italic',color='white',place='centre',grow=TRUE) + ggplot2::labs(title = "Total Expenditures by category (1998-2008)")
+
+
+```
+
+
+```{r area_plot}
+
+yearexp.df <- sqldf("select 
+          year
+          ,sum(expenditure) as expenditure 
+       from df 
+       group by year")
+
+ggplot(yearexp.df, aes(x=year, y=expenditure)) +
+  geom_area(color='blue',fill='blue') + labs(title='Expenditure over Years', x='Year', y='Expenditure')
+```
+
+
+```{r stackedarea_plot}
+
+ggplot(df, aes(x=year, y=expenditure, fill=category)) +
+  geom_area(color='white') + labs(title='Expenditure by Category over Years', x='Year', y='Expenditure')
+```
+```{r step_plot}
+
+ggplot(yearexp.df, aes(x=year, y=expenditure)) +
+  geom_step() + labs(title='Expenditure over Years', x='Year', y='Expenditure')
+```
