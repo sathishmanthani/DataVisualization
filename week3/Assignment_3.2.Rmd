@@ -1,0 +1,76 @@
+---
+title: "Assignment 3.2"
+author: "Sathish Manthani"
+date: "7/11/2020"
+output: 
+  word_document: 
+fontsize: 13pt
+---
+
+### Packages
+Import the required packages/libraries to anlayze the dataset  
+
+```{r libraries, message = FALSE}
+
+library(ggplot2)    # plots for visualization
+library(dplyr)      # for data manipulation
+library(corrplot)   # for display of correlation matrix
+library(GGally)     # for gallary display of charts
+library(gridExtra)  # to view plots in grid
+library(purrr)      # for map_dbl function
+
+```
+
+
+### Read the data file  
+
+```{r data_import}
+crime <- read.csv('crimerates-by-state-2005.csv', sep=",", header=TRUE)
+crime2 <- crime[crime$state != "United States",]
+
+```
+
+
+```{r scatter_plot}
+scatter.smooth(crime2$murder, crime2$burglary, xlim = c(0,10), ylim = c(0,1200), xlab='Murders', ylab='Burglaries', main='Scatter plot- Murders vs Burglaries' )
+
+
+
+```
+
+
+```{r data_import2}
+birth <- read.csv('birth-rates-yearly.csv', sep=",", header=TRUE)
+
+```
+
+```{r density_plot}
+d <-density(birth$rate)
+plot(d, type="n",  main='Density plot- Birth rate')
+polygon(d, col="#821122", border="#cccccc")
+
+```
+
+
+```{r bubble_plot}
+
+library(sqldf)
+crime.df <- sqldf("select 
+          state
+          ,sum(murder) as murder 
+          ,sum(population) as population
+       from crime 
+       group by state
+       order by murder desc
+       limit 10
+       ")
+
+crime.df %>%
+  arrange(desc(murder)) %>%
+  mutate(country = factor(state)) %>%
+  ggplot(aes(x=population, y=murder, size=murder, color=state)) +
+    geom_point(alpha=0.8) +
+    scale_size(range = c(0, 5), name="Murders")
+
+
+```
